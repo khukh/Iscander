@@ -1,2 +1,3 @@
 #pragma once
-void runge(status &sv, double h, int n);
+#include "status.h"
+void runge(status &sv, double h);

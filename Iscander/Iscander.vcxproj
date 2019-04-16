@@ -157,6 +157,7 @@
     <ClInclude Include="RGParam.h" />
     <ClInclude Include="Runge.h" />
     <ClInclude Include="status.h" />
+    <ClInclude Include="vOperator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Iscander.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="RGParam.cpp" />
     <ClCompile Include="Runge.cpp" />
     <ClCompile Include="status.cpp" />
+    <ClCompile Include="vOperator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,7 +2,7 @@
 
 #include "iostream" 
 #include "cmath"
-#include "vector"
+#include "pch.h"
 #include "iomanip"
 #include "status.h"
 
@@ -17,41 +17,41 @@ std::vector <double> multAndSum(std::vector<double> xi, std::vector<double> k, d
 	return(b);
 }
 
-void runge(status &sv, double h, int n) {
+void runge(status &sv, double h) {
 	static std::vector <double> xi;
 	xi = sv.getParam();
 	//int size = xi.size();
 	sv.setParam(xi);
-	sv.nonIntegr( n);
+	sv.nonIntegr();
 
 	static std::vector <double> k1;
-	k1 = sv.rightPart(n);
+	k1 = sv.rightPart();
 	//static std::vector <double> a(xi.size());
 	static std::vector <double> null(xi.size());     //нулевой вектор, т.е. все элементы=0
-	k1 = multAndSum(null, k1, h);
-	sv.setParam(multAndSum(xi, k1, 0.5));
+	k1 = k1 * h;
+	sv.setParam(k1 * 0.5 + xi);
 
-	sv.nonIntegr( n);
+	sv.nonIntegr();
 	static std::vector <double> k2;
-	k2 = sv.rightPart(n);
-	k2 = multAndSum(null, k2, h);
-	sv.setParam(multAndSum(xi, k2, 0.5));
-	sv.nonIntegr(n);
+	k2 = sv.rightPart();
+	k2 = k2 * h;
+	sv.setParam(k2 * 0.5 + xi);
+	sv.nonIntegr();
 
 	static std::vector <double> k3;
-	k3 = sv.rightPart(n);
-	k3 = multAndSum(null, k3, h);
-	sv.setParam(multAndSum(xi, k3, 1));
+	k3 = sv.rightPart();
+	k3 = k3 * h;
+	sv.setParam(k3 * 1 + xi);
 
-	sv.nonIntegr(n);
+	sv.nonIntegr();
 	static std::vector <double> k4;
-	k4 = sv.rightPart(n);
-	k4 = multAndSum(null, k4, h);
+	k4 = sv.rightPart();
+	k4 = k4 * h;
 	static std::vector <double> result(xi.size());
+
+	result = xi + (k1 + (k2 * 2) + (k3 * 2) + k4) * (1 / 6);
 	
-	for (unsigned int i = 0; i <= xi.size() - 1; i++) {
-		result[i] = xi[i] + (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) / 6;
-	}
+	
 	sv.setParam(result);
-	sv.nonIntegr(n);
+	sv.nonIntegr();
 }

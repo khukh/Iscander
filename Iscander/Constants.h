@@ -19,12 +19,16 @@ const double W_X0 = 0;
 const double W_Y0 = 0;
 const double W_Z0 = 0;
 
-const double I_X = 170;
-const double I_Y = 640;
-const double I_Z = 640;
+const double I_X0 = 170;
+const double I_Y0 = 640;
+const double I_Z0 = 640;
 
 const double D_M = 0.95;
 const double L = 7;
 
 const double V0 = 1200; //модуль скорости
 const double M0 = 1500 - 5 * N;
+
+const double H = 0.5;
+const double T_FIN = 30.0;
+const double EPS1 = 1E-6;

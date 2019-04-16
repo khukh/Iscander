@@ -1,4 +1,5 @@
 #pragma once
+#include "pch.h"
 class RGParam {
 public:
 	RGParam(double pitch, double yaw, double roll);
