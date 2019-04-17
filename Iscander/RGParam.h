@@ -6,7 +6,7 @@ public:
 	std::vector <double> RGPar;
 	//std::vector <double> RGAngle;
 
-	
+	void norm();
 	std::vector <double> getRGPar();
 	~RGParam();
 };

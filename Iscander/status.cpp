@@ -70,7 +70,9 @@ void status::nonIntegr() {
 	ForcePr[0] = -Cx * density * vFullsq * S_M / 2;
 	ForcePr[1] = Cy * density * vFullsq * S_M / 2;
 	ForcePr[2] = Cz * density * vFullsq * S_M / 2;
-
+	Rot.RG.norm();
+	Rot.fromRGtoMatrix();
+	Rot.fromRGtoAngles();
 	ForcePrG = Rot.A * ForcePr;
 
 	ForceG[0] = 0;

@@ -18,6 +18,13 @@ RGParam::RGParam(double pitch, double yaw, double roll) {
 }
 
 
+void RGParam::norm() {
+	double abs = sqrt(pow(RGPar[0], 2) + pow(RGPar[1], 2) + pow(RGPar[2], 2) + pow(RGPar[3], 2));
+	for (int i = 0; i < 4; i++) {
+		RGPar[i] /= abs;
+	}
+}
+
 std::vector<double> RGParam::getRGPar() {
 	std::vector <double> rgPar = RGPar;
 	//?

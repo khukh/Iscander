@@ -49,7 +49,7 @@ void runge(status &sv, double h) {
 	k4 = k4 * h;
 	static std::vector <double> result(xi.size());
 
-	result = xi + (k1 + (k2 * 2) + (k3 * 2) + k4) * (1 / 6);
+	result = xi + (k1 + (k2 * 2) + (k3 * 2) + k4) * (1.0 / 6.0);
 	
 	
 	sv.setParam(result);
