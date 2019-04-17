@@ -8,7 +8,7 @@
 #include <fstream>
 
 
-status::status(): A(PITCH0, YAW0, ROLL0), Rg(PITCH0, YAW0, ROLL0) {
+status::status(): Rot(PITCH0, YAW0, ROLL0) {
 	parametr.resize(14);
 	ForcePr.resize(3);
 	ForcePrG.resize(3);
@@ -27,7 +27,7 @@ status::status(): A(PITCH0, YAW0, ROLL0), Rg(PITCH0, YAW0, ROLL0) {
 	parametr[7] = 0;
 	parametr[8] = 0;
 	//параметры Родрига-Гамильтона
-	std::vector <double> a = Rg.getRGPar();
+	std::vector <double> a = Rot.RG.getRGPar();
 	parametr[9] = a[0];
 	parametr[10] = a[1];
 	parametr[11] = a[2];
@@ -71,7 +71,7 @@ void status::nonIntegr() {
 	ForcePr[1] = Cy * density * vFullsq * S_M / 2;
 	ForcePr[2] = Cz * density * vFullsq * S_M / 2;
 
-	ForcePrG = A * ForcePr;
+	ForcePrG = Rot.A * ForcePr;
 
 	ForceG[0] = 0;
 	ForceG[1] = -M * g;
@@ -101,7 +101,7 @@ void status::printParam(std::ofstream &fout) {
 		fout << Torque[i] << '\t';
 	}
 	for (int i = 0; i < 3; i++) {
-		fout << Rg.RGAngle[i] << '\t';
+		fout << Rot.Angles[i] << '\t';
 	}
 	fout << '\n';
 
@@ -126,8 +126,7 @@ status& status::operator=(const status& right) {
 	ForceG = right.ForceG;  
 	Torque = right.Torque;  
 
-	A = right.A;
-	Rg = right.Rg;
+	Rot = right.Rot;
 
 	alpha = right.alpha;
 	betta = right.betta;

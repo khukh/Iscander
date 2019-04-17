@@ -6,8 +6,8 @@
 //#include <vector>
 //#include "Constants.h"
 #include <fstream>
-#include "matrix.h"
-#include "RGParam.h"
+#include "rotation.h"
+
 
 
 
@@ -23,8 +23,7 @@ public:
 	std::vector <double> ForceG;  //вектор силы притяжения
 	std::vector <double> Torque;  //момент силы
 
-	matrix A;
-	RGParam Rg;
+	rotation Rot;
 
 	void nonIntegr();  //пересчет неинтегрируемых параметров
 	std::vector <double> rightPart();	//значения производных	
@@ -47,9 +46,10 @@ protected:
 		parametr [7] = Wy
 		parametr [8] = Wz
 		parametr [9] = ro
-		parametr [9] = ro
-		parametr [9] = ro
-		parametr [9] = ro
+		parametr [10] = l
+		parametr [11] = mu
+		parametr [12] = nu
+		parametr [13] = t
 
 		*/
 	//std::vector <std::vector <double>> psiX;

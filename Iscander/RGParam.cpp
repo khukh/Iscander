@@ -4,15 +4,15 @@
 
 RGParam::RGParam(double pitch, double yaw, double roll) {
 	RGPar.resize(4);
-	RGAngle.resize(3);
-	RGAngle[0] = pitch;
+	//RGAngle.resize(3);
+	/*RGAngle[0] = pitch;
 	RGAngle[1] = yaw;
-	RGAngle[2] = roll;
+	RGAngle[2] = roll;*/
 
-	RGPar[0] = cos(0.5*RGAngle[1])*cos(0.5*RGAngle[0])*cos(0.5*RGAngle[2]) - sin(0.5*RGAngle[1])*sin(0.5*RGAngle[0])*sin(0.5*RGAngle[2]);  //ro
-	RGPar[1] = sin(0.5*RGAngle[1])*sin(0.5*RGAngle[0])*cos(0.5*RGAngle[2]) + cos(0.5*RGAngle[1])*cos(0.5*RGAngle[0])*sin(0.5*RGAngle[2]);  //l
-	RGPar[2] = sin(0.5*RGAngle[1])*cos(0.5*RGAngle[0])*cos(0.5*RGAngle[2]) + cos(0.5*RGAngle[1])*sin(0.5*RGAngle[0])*sin(0.5*RGAngle[2]);  //mu
-	RGPar[3] = cos(0.5*RGAngle[1])*sin(0.5*RGAngle[0])*cos(0.5*RGAngle[2]) - sin(0.5*RGAngle[1])*cos(0.5*RGAngle[0])*sin(0.5*RGAngle[2]);  //nu
+	RGPar[0] = cos(0.5*yaw)*cos(0.5*pitch)*cos(0.5*roll) - sin(0.5*yaw)*sin(0.5*pitch)*sin(0.5*roll);  //ro
+	RGPar[1] = sin(0.5*yaw)*sin(0.5*pitch)*cos(0.5*roll) + cos(0.5*yaw)*cos(0.5*pitch)*sin(0.5*roll);  //l
+	RGPar[2] = sin(0.5*yaw)*cos(0.5*pitch)*cos(0.5*roll) + cos(0.5*yaw)*sin(0.5*pitch)*sin(0.5*roll);  //mu
+	RGPar[3] = cos(0.5*yaw)*sin(0.5*pitch)*cos(0.5*roll) - sin(0.5*yaw)*cos(0.5*pitch)*sin(0.5*roll);  //nu
 
 	
 }
