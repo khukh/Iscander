@@ -7,7 +7,7 @@
 //#include "Constants.h"
 #include <fstream>
 #include "rotation.h"
-
+#include "Atmosphere.h"
 
 
 
@@ -16,7 +16,7 @@ public:
 	status();
 	~status();
 
-	
+	Atmosphere GOST4401;
 
 	std::vector <double> ForcePr;
 	std::vector <double> ForcePrG;  //проекция 

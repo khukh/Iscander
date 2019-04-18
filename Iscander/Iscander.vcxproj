@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Atmosphere.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="pch.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="vOperator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Atmosphere.cpp" />
     <ClCompile Include="Iscander.cpp" />
     <ClCompile Include="matrix.cpp" />
     <ClCompile Include="pch.cpp">

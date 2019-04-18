@@ -67,6 +67,7 @@ std::vector <double> status::rightPart() {
 
 void status::nonIntegr() {
 	double vFullsq = parametr[0] * parametr[0] + parametr[1] * parametr[1] + parametr[2] * parametr[2];
+	density = GOST4401.roFunc(parametr[4]);
 	ForcePr[0] = -Cx * density * vFullsq * S_M / 2;
 	ForcePr[1] = Cy * density * vFullsq * S_M / 2;
 	ForcePr[2] = Cz * density * vFullsq * S_M / 2;
