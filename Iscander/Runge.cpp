@@ -55,3 +55,32 @@ void runge(status &sv, double h) {
 	sv.setParam(result);
 	sv.nonIntegr();
 }
+
+
+	
+	//интегрирование методом Эйлера
+	void euler(status &sv, double h) {
+	
+		static std::vector <double> xi;
+		xi = sv.getParam();
+		sv.setParam(xi);
+		sv.nonIntegr();
+
+		static std::vector <double> f;
+		f = sv.rightPart();
+		sv.setParam(f * h + xi);
+
+
+		
+		sv.nonIntegr();
+		
+	}
+
+	//void setZnachEuler(vector <double> prir, double h) {
+	//	parametr[0] = euler(parametr[0], prir[0], h);
+	//	parametr[1] = euler(parametr[1], prir[1], h);
+	//	parametr[2] = euler(parametr[2], prir[2], h);
+	//	parametr[3] = euler(parametr[3], prir[3], h);
+	//	parametr[4] = euler(parametr[4], prir[4], h);
+	//	parametr[5] = euler(parametr[5], prir[5], h);
+	//}

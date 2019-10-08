@@ -31,4 +31,11 @@ std::vector<double> RGParam::getRGPar() {
 	return RGPar;
 }
 
+void RGParam::setRGPar(double ro, double lymbda, double mu, double nu) {
+	RGPar[0] = ro;
+	RGPar[1] = lymbda;
+	RGPar[2] = mu;
+	RGPar[3] = nu;
+}
+
 RGParam::~RGParam() {}

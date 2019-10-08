@@ -10,6 +10,7 @@ public:
 	rotation(double pitch, double yaw, double roll);
 	void fromRGtoAngles();
 	void fromRGtoMatrix();
+	void fromRGtoMatrixT();
 	~rotation();
 };
 

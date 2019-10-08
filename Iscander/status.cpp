@@ -14,8 +14,9 @@ status::status(): Rot(PITCH0, YAW0, ROLL0) {
 	ForcePrG.resize(3);
 	ForceG.resize(3);
 	Torque.resize(3);
+	//ADkoef.resize(6);
 	//скорости
-	parametr[0] = V0 * cos(PITCH0) * cos(YAW0);;
+	parametr[0] = V0 * cos(PITCH0) * cos(YAW0);
 	parametr[1] = V0 * sin(PITCH0);
 	parametr[2] = V0 * cos(PITCH0) * sin(YAW0);
 	//кординаты
@@ -56,8 +57,8 @@ std::vector <double> status::rightPart() {
 	//dPRG/dt
 	prir[9] = -0.5*(parametr[6] * parametr[10] + parametr[7] * parametr[11] + parametr[8] * parametr[12]);
 	prir[10] = 0.5*(parametr[6] * parametr[9] - parametr[7] * parametr[12] + parametr[8] * parametr[11]);
-	prir[9] = 0.5*(parametr[6] * parametr[12] + parametr[7] * parametr[9] - parametr[8] * parametr[10]);
-	prir[9] = 0.5*(-parametr[6] * parametr[11] + parametr[7] * parametr[10] + parametr[8] * parametr[9]);
+	prir[11] = 0.5*(parametr[6] * parametr[12] + parametr[7] * parametr[9] - parametr[8] * parametr[10]);
+	prir[12] = 0.5*(-parametr[6] * parametr[11] + parametr[7] * parametr[10] + parametr[8] * parametr[9]);
 	//dt/dt
 	prir[13] = 1;
 
@@ -66,22 +67,49 @@ std::vector <double> status::rightPart() {
 }
 
 void status::nonIntegr() {
-	double vFullsq = parametr[0] * parametr[0] + parametr[1] * parametr[1] + parametr[2] * parametr[2];
-	density = GOST4401.roFunc(parametr[4]);
-	ForcePr[0] = -Cx * density * vFullsq * S_M / 2;
-	ForcePr[1] = Cy * density * vFullsq * S_M / 2;
-	ForcePr[2] = Cz * density * vFullsq * S_M / 2;
+	Rot.RG.setRGPar(parametr[9], parametr[10], parametr[11], parametr[12]);
 	Rot.RG.norm();
-	Rot.fromRGtoMatrix();
 	Rot.fromRGtoAngles();
-	ForcePrG = Rot.A * ForcePr;
 
+	std::vector <double> v(3);
+	std::vector <double> vg {parametr[0],parametr[1],parametr[2]};
+	Rot.fromRGtoMatrixT();
+	v = Rot.A*vg;
+
+	double vFullsq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+	density = GOST4401.roFunc(parametr[4]);
+	double ah = atan2(v[1], v[0]);
+	alpha = - ah;
+	betta = asin(v[2] / sqrt(vFullsq));
+	double alphaSpace = sqrt(alpha*alpha + betta * betta);
+	double mach = sqrt(vFullsq) / GOST4401.aFunc(parametr[4]);
+
+	double deltaT = K_T1 * (parametr[8]*cos(Rot.Angles[2]) + parametr[7]*sin(Rot.Angles[2]));
+	double deltaN = K_N1 * (parametr[7] * cos(Rot.Angles[2]) - parametr[8] * sin(Rot.Angles[2]))/cos(Rot.Angles[0]);
+	double deltaE = K_E1 * Rot.Angles[2] + K_E2 * (parametr[6] - tan(Rot.Angles[0])*(parametr[7]*cos(Rot.Angles[2])-parametr[8]*sin(Rot.Angles[2])));
+
+	double q = density * vFullsq / 2;
+	ForcePr[0] = -Cx(mach, alphaSpace) * density * vFullsq * S_M / 2;
+	ForcePr[1] = (CyAl(mach, alpha)*alpha +CyDeltaT(mach, alpha)*deltaT) * density * vFullsq * S_M / 2;
+	ForcePr[2] = (CzBetta(mach, betta)*betta + CzDeltaN(mach, betta)*deltaN) * density * vFullsq * S_M / 2;
+	Rot.fromRGtoMatrix();
+	ForcePrG = Rot.A * ForcePr;
+	g = 9.80665/*PI0 / ((R_EARTH_G + parametr[4])*(R_EARTH_G + parametr[4]))*/;
 	ForceG[0] = 0;
 	ForceG[1] = -M * g;
 	ForceG[2] = 0;
 
-	alpha = -atan2(parametr[1], parametr[0]);
-	betta = asin(parametr[2] / sqrt(vFullsq));
+	//TODO: вставить моменты!
+	//double q = L * density * vFullsq * S_M / 2;
+	double kADdevelopment = 0.0;
+	double kMVr = 0;
+	double P = 0; //тяга?
+	double Mstab = 0.5 * D_M * P * deltaE;
+	Torque[0] = (MxOmegaX(mach, alphaSpace) * parametr[6] * L / sqrt(vFullsq) + 0 * MxDelta(mach, alpha, q*S_M*L) * deltaE)* density * vFullsq * S_M * L / 2 + Mstab;
+	Torque[1] = (MyOmegaY(mach, betta) * parametr[7] * L / sqrt(vFullsq) + MyBetta(mach, betta) * betta + MyDelta(mach, betta, q*S_M*L) * deltaN) * density * vFullsq * S_M * L / 2;
+	Torque[2] = (MzOmegaZ(mach, alpha) * parametr[8] * L / sqrt(vFullsq) + MzAlpha(mach, alpha) * alpha + MzDelta(mach, alpha, q*S_M*L) *deltaE*S_M*L) * density * vFullsq * S_M * L / 2;
+
+
 }
 
 //вывод параметров
@@ -92,7 +120,7 @@ void status::printParam(std::ofstream &fout) {
 		
 	}
 	
-	fout << alpha << '\t' << betta << '\t';
+	fout << alpha * 180 / PI << '\t' << betta << '\t';
 
 	for (int i = 0; i < 3; i++) {
 		fout << ForceG[i] << '\t';
@@ -104,7 +132,7 @@ void status::printParam(std::ofstream &fout) {
 		fout << Torque[i] << '\t';
 	}
 	for (int i = 0; i < 3; i++) {
-		fout << Rot.Angles[i] << '\t';
+		fout << Rot.Angles[i]*180/PI << '\t';
 	}
 	fout << '\n';
 
@@ -135,9 +163,8 @@ status& status::operator=(const status& right) {
 	betta = right.betta;
 
 	g = right.g;
-	Cx = right.Cx;
-	Cy = right.Cy;
-	Cz = right.Cz;
+	//ADkoef = right.ADkoef;
+	
 	density = right.density;
 
 	return *this;

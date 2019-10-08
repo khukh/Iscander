@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Atmosphere.h"
 
-
+//конструктор
 Atmosphere::Atmosphere() {
 	fillArrPandT();
 }

@@ -8,6 +8,7 @@
 #include <fstream>
 #include "rotation.h"
 #include "Atmosphere.h"
+#include "KoefCalc.h"
 
 
 
@@ -15,6 +16,10 @@ class status {
 public:
 	status();
 	~status();
+
+	const double R_EARTH_G = (6371E3);
+	const double PI0 = (398600.4418E9);
+
 
 	Atmosphere GOST4401;
 
@@ -57,17 +62,18 @@ protected:
 	//std::vector<double> u;
 	double alpha;
 	double betta;
-	const double S_M = 0.1;
+	const double S_M = PI *D_M*D_M/4;
 	const double M = M0;
 	const double I_X = I_X0;
 	const double I_Y = I_Y0;
 	const double I_Z = I_Z0;
 	/////TODO: написать модули для определения параметров
-	double g = 9.80665;
-	double Cx = 0.5;
+	double g;
+	/*double Cx = 0.5;
 	double Cy = 0.5;
-	double Cz = 0.5;
-	double density = 0.8;
+	double Cz = 0.5;*/
+	//std::vector <double> ADkoef;
+	double density;
 	
 	//double mu;
 

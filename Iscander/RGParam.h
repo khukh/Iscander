@@ -8,6 +8,7 @@ public:
 
 	void norm();
 	std::vector <double> getRGPar();
+	void setRGPar(double ro, double lymbda, double mu, double nu);
 	~RGParam();
 };
 
