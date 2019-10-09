@@ -105,9 +105,11 @@ void status::nonIntegr() {
 	double kMVr = 0;
 	double P = 0; //т€га?
 	double Mstab = 0.5 * D_M * P * deltaE;
-	Torque[0] = (MxOmegaX(mach, alphaSpace) * parametr[6] * L / sqrt(vFullsq) + 0 * MxDelta(mach, alpha, q*S_M*L) * deltaE)* density * vFullsq * S_M * L / 2 + Mstab;
+	Torque[0] = (MxOmegaX(mach, alphaSpace) * parametr[6] * L / sqrt(vFullsq) + MxDelta(mach, alpha, q*S_M*L) * deltaE)* density * vFullsq * S_M * L / 2 + Mstab;
 	Torque[1] = (MyOmegaY(mach, betta) * parametr[7] * L / sqrt(vFullsq) + MyBetta(mach, betta) * betta + MyDelta(mach, betta, q*S_M*L) * deltaN) * density * vFullsq * S_M * L / 2;
-	Torque[2] = (MzOmegaZ(mach, alpha) * parametr[8] * L / sqrt(vFullsq) + MzAlpha(mach, alpha) * alpha + MzDelta(mach, alpha, q*S_M*L) *deltaE*S_M*L) * density * vFullsq * S_M * L / 2;
+	Torque[2] = (MzOmegaZ(mach, alpha) * parametr[8] * L / sqrt(vFullsq) + MzAlpha(mach, alpha) * alpha + MzDelta(mach, alpha, q*S_M*L) *deltaT) * density * vFullsq * S_M * L / 2;
+
+	
 
 
 }
