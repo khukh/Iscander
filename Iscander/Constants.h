@@ -33,10 +33,10 @@ const double H = 0.01;
 const double T_FIN = 10.0;
 const double EPS1 = 1E-6;
 
+const double KSI_SST = 0.35;
+const double KSI_SSN = 0.35;
+const double KSI_SSE = 0.35;
 
-const double K_T1 = 1.0;
-const double K_N1 = 1.0;
-const double K_E1 = 1.0;
-const double K_E2 = 1.0;
-
-
+const double K_SST = 0.95;
+const double K_SSN = 0.95;
+const double T_SSE = 0.01;

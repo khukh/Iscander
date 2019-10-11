@@ -9,12 +9,12 @@
 #include "rotation.h"
 #include "Atmosphere.h"
 #include "KoefCalc.h"
-
+#include "targetStatus.h"
 
 
 class status {
 public:
-	status();
+	status(std::vector <double> a);
 	~status();
 
 	const double R_EARTH_G = (6371E3);
@@ -29,6 +29,7 @@ public:
 	std::vector <double> Torque;  //момент силы
 
 	rotation Rot;
+	targetStatus Target;
 
 	void nonIntegr();  //пересчет неинтегрируемых параметров
 	std::vector <double> rightPart();	//значения производных	
