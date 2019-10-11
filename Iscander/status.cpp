@@ -8,7 +8,7 @@
 #include <fstream>
 
 
-status::status(std::vector <double> coordinates): Rot(PITCH0, YAW0, ROLL0), Target(coordinates) {
+status::status(std::vector <double> coordinates): Rot(PITCH0, YAW0, ROLL0), Target(coordinates),B(0,0,0) {
 	parametr.resize(14);
 	ForcePr.resize(3);
 	ForcePrG.resize(3);
@@ -72,61 +72,32 @@ void status::nonIntegr() {
 	Rot.fromRGtoAngles();
 
 	std::vector <double> v(3);
-	std::vector <double> vg {parametr[0],parametr[1],parametr[2]};
+	std::vector <double> vg = {parametr[0],parametr[1],parametr[2]};
 	Rot.fromRGtoMatrixT();
 	v = Rot.A*vg;
 
-	double vFullsq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+	vFullsq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
 	density = GOST4401.roFunc(parametr[4]);
 	double ah = atan2(v[1], v[0]);
 	alpha = - ah;
 	betta = asin(v[2] / sqrt(vFullsq));
 	double alphaSpace = sqrt(alpha*alpha + betta * betta);
-	double mach = sqrt(vFullsq) / GOST4401.aFunc(parametr[4]);
+	mach = sqrt(vFullsq) / GOST4401.aFunc(parametr[4]);
 
-	double q = density * vFullsq / 2;
+	q = density * vFullsq / 2;
 
-	double a11 = -MzOmegaZ(mach, alpha) * q * S_M * L * L / (I_Z * sqrt(vFullsq));
-	double a12 = -MzAlpha(mach, alpha) * q * S_M * L / I_Z;
-	double a13 = -MzDelta(mach, alpha, q*S_M*L) * q * S_M * L / I_Z;
-	double a42 = CyAl(mach, alpha) * q * S_M / (M * sqrt(vFullsq));
-	double a43 = CyDeltaT(mach, alpha) * q * S_M / (M * sqrt(vFullsq));
+	r = sqrt((Target.X - parametr[3])*(Target.X - parametr[3]) + (Target.Y - parametr[4])*(Target.Y - parametr[4]) + (Target.Z - parametr[5])*(Target.Z - parametr[5]));
+	fi = -asin((Target.Y - parametr[4]) / r);
+	hi = atan2((Target.Z - parametr[5]), (Target.X - parametr[3]));
+	B.fillMatrix(fi, hi, 0);
+	std::vector <double> dV = { Target.Vx - parametr[0], Target.Vy - parametr[1], Target.Vz - parametr[2] };
+	std::vector <double> vSphere(3);
+	vSphere = B * dV;
+	fiPoint = vSphere[0] / r;
+	hiPoint = vSphere[1] / (r * cos(fi));
 
-	double b11 = MyOmegaY(mach, betta) * q * S_M * L * L / (I_Y * sqrt(vFullsq));
-	double b12 = MyBetta(mach, betta) * q * S_M * L / I_Y;
-	double b13 = -MyDelta(mach, betta, q*S_M*L) * q * S_M * L / I_Y;
-	double b42 = CyAl(mach, betta) * q * S_M / (M * sqrt(vFullsq));
-	double b43 = -CyDeltaT(mach, betta) * q * S_M / (M * sqrt(vFullsq));
+	fillDelta(fiPoint, hiPoint);
 
-	double c11 = -MxOmegaX(mach, alpha) * q * S_M * L * L / (I_X * sqrt(vFullsq));
-	double c13 = MxDelta(mach, alpha, q*S_M*L) / I_X;
-
-	double K_T = (a12 * a43 - a13 * a42) / (a12 + a11 * a42);
-	double T_1T = -(a13) / (a13 * a42 + a12 * a43);
-	double T_T = 1 / sqrt(a12 + a11 * a42);
-	double KSI_T = (a11 + a42) / (2 * sqrt(a12 + a11 * a42));
-
-	double K_N = (b12 * b43 - b13 * b42) / (b12 + b11 * b42);
-	double T_1N = -(b13) / (b13 * b42 + b12 * b43);
-	double T_N = 1 / sqrt(b12 + b11 * b42);
-	double KSI_N = (b11 + b42) / (2 * sqrt(b12 + b11 * b42));
-
-	double K_E = c13 / c11;
-	double T_E = 1 / c11;
-
-	double K_T2 = -2 * T_T*(KSI_T*T_1T - KSI_SST * KSI_SST*T_T - sqrt(KSI_SST*KSI_SST*KSI_SST*KSI_SST*T_T*T_T - 2 * KSI_T*KSI_SST*T_T*T_1T + T_1T * T_1T*KSI_SST*KSI_SST)) / (K_T*T_1T*T_1T);
-	double K_T1 = K_SST * (1 + K_T2 * K_T) / (K_T*T_1T*T_1T);
-
-	double K_N2 = -2 * T_N * (KSI_N * T_1N - KSI_SSN * KSI_SSN*T_N - sqrt(KSI_SSN * KSI_SSN * KSI_SSN * KSI_SSN * T_N * T_N - 2 * KSI_N*KSI_SSN*T_N*T_1N + T_1N * T_1N*KSI_SSN*KSI_SSN)) / (K_N*T_1N*T_1N);
-	double K_N1 = K_SSN * (1 + K_N2 * K_N) / (K_N*T_1N*T_1N);
-
-	double K_E1 = (2 * KSI_SSE*T_E - T_SSE) / (K_E*T_SSE);
-	double K_E2 = T_E / (K_E*T_SSE*T_SSE);
-
-
-	double deltaT = K_T1 * (parametr[8]*cos(Rot.Angles[2]) + parametr[7]*sin(Rot.Angles[2])) + K_T2 * (Rot.Angles[0]);
-	double deltaN = K_N1 * (parametr[7] * cos(Rot.Angles[2]) - parametr[8] * sin(Rot.Angles[2]))/cos(Rot.Angles[0]) + K_N2 * (Rot.Angles[1]);
-	double deltaE = K_E2 * Rot.Angles[2] + K_E1 * (parametr[6] - tan(Rot.Angles[0])*(parametr[7]*cos(Rot.Angles[2])-parametr[8]*sin(Rot.Angles[2])));
 
 	
 	ForcePr[0] = -Cx(mach, alphaSpace) * density * vFullsq * S_M / 2;
@@ -186,6 +157,56 @@ void status::setParam(std::vector <double> b) {
 std::vector <double> status::getParam() {
 	std::vector <double> get = parametr;
 	return(get);
+}
+void status::fillDelta(double fiP, double hiP)
+{
+
+	double a11 = -MzOmegaZ(mach, alpha) * q * S_M * L * L / (I_Z * sqrt(vFullsq));
+	double a12 = -MzAlpha(mach, alpha) * q * S_M * L / I_Z;
+	double a13 = -MzDelta(mach, alpha, q*S_M*L) * q * S_M * L / I_Z;
+	double a42 = CyAl(mach, alpha) * q * S_M / (M * sqrt(vFullsq));
+	double a43 = CyDeltaT(mach, alpha) * q * S_M / (M * sqrt(vFullsq));
+
+	double b11 = -MyOmegaY(mach, betta) * q * S_M * L * L / (I_Y * sqrt(vFullsq));
+	double b12 = -MyBetta(mach, betta) * q * S_M * L / I_Y;
+	double b13 = -MyDelta(mach, betta, q*S_M*L) * q * S_M * L / I_Y;
+	//double b42 = CyAl(mach, betta) * q * S_M / (M * sqrt(vFullsq));
+	double b42 = 0;
+	double b43 = -CyDeltaT(mach, betta) * q * S_M / (M * sqrt(vFullsq));
+
+	double c11 = -MxOmegaX(mach, alpha) * q * S_M * L * L / (I_X * sqrt(vFullsq));
+	double c13 = MxDelta(mach, alpha, q*S_M*L) / I_X;
+
+	double K_T = (a12 * a43 - a13 * a42) / (a12 + a11 * a42);
+	double T_1T = -(a13) / (a13 * a42 + a12 * a43);
+	double T_T = 1 / sqrt(a12 + a11 * a42);
+	double KSI_T = (a11 + a42) / (2 * sqrt(a12 + a11 * a42));
+
+	double K_N = (b12 * b43 - b13 * b42) / (b12 + b11 * b42);
+	double T_1N = -(b13) / (b13 * b42 + b12 * b43);
+	double T_N = 1 / sqrt(b12 + b11 * b42);
+	double KSI_N = (b11 + b42) / (2 * sqrt(b12 + b11 * b42));
+
+	double K_E = c13 / c11;
+	double T_E = 1 / c11;
+
+	double K_T2 = -2 * T_T*(KSI_T*T_1T - KSI_SST * KSI_SST*T_T - sqrt(KSI_SST*KSI_SST*KSI_SST*KSI_SST*T_T*T_T - 2 * KSI_T*KSI_SST*T_T*T_1T + T_1T * T_1T*KSI_SST*KSI_SST)) / (K_T*T_1T*T_1T);
+	double K_T1 = K_SST * (1 + K_T2 * K_T) / (K_T*T_1T*T_1T);
+
+	double K_N2 = -2 * T_N * (KSI_N * T_1N - KSI_SSN * KSI_SSN*T_N - sqrt(KSI_SSN * KSI_SSN * KSI_SSN * KSI_SSN * T_N * T_N - 2 * KSI_N*KSI_SSN*T_N*T_1N + T_1N * T_1N*KSI_SSN*KSI_SSN)) / (K_N*T_1N*T_1N);
+	double K_N1 = K_SSN * (1 + K_N2 * K_N) / (K_N*T_1N*T_1N);
+
+	double K_E1 = (2 * KSI_SSE*T_E - T_SSE) / (K_E*T_SSE);
+	double K_E2 = T_E / (K_E*T_SSE*T_SSE);
+
+	deltaT = K_T1 * (parametr[8] * cos(Rot.Angles[2]) + parametr[7] * sin(Rot.Angles[2])) + K_T2 * (fiP);
+	deltaN = K_N1 * (parametr[7] * cos(Rot.Angles[2]) - parametr[8] * sin(Rot.Angles[2])) / cos(Rot.Angles[0]) + K_N2 * (hiP);
+	deltaE = K_E2 * Rot.Angles[2] + K_E1 * (parametr[6] - tan(Rot.Angles[0])*(parametr[7] * cos(Rot.Angles[2]) - parametr[8] * sin(Rot.Angles[2])));
+
+	
+	deltaT = (abs(deltaT*toDeg) > 6.5) ? 6.5*toRad : deltaT;
+	deltaN = (abs(deltaN*toDeg) > 6.5) ? 6.5*toRad : deltaN;
+	deltaE = (abs(deltaE*toDeg) > 6.5) ? 6.5*toRad : deltaE;
 }
 status& status::operator=(const status& right) {
 	//проверка на самоприсваивание

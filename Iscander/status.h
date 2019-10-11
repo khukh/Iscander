@@ -20,7 +20,7 @@ public:
 	const double R_EARTH_G = (6371E3);
 	const double PI0 = (398600.4418E9);
 
-
+	matrix B;
 	Atmosphere GOST4401;
 
 	std::vector <double> ForcePr;
@@ -38,6 +38,7 @@ public:
 	void setParam(std::vector <double> b);
 	std::vector <double> getParam();
 
+	void fillDelta(double fiP, double hiP);
 
 	status& operator=(const status& right);
 protected:
@@ -74,7 +75,9 @@ protected:
 	double Cy = 0.5;
 	double Cz = 0.5;*/
 	//std::vector <double> ADkoef;
-	double density;
+	double density, q, mach, vFullsq;
+	double deltaT, deltaN, deltaE;
+	double r, fi, hi, fiPoint, hiPoint;
 	
 	//double mu;
 

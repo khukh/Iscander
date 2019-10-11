@@ -9,13 +9,28 @@ matrix::matrix(double pitch, double yaw, double roll) { //из связанной в стартов
 	matr[0][1] = -sin(pitch)*cos(yaw)*cos(roll) + sin(yaw)*sin(roll);
 	matr[0][2] = sin(pitch)*cos(yaw)*sin(roll)+sin(yaw)*cos(roll);
 
-	matr[0][0] = sin(pitch);
-	matr[0][1] = cos(pitch)*cos(roll);
-	matr[0][2] = -cos(pitch)*sin(roll);
+	matr[1][0] = sin(pitch);
+	matr[1][1] = cos(pitch)*cos(roll);
+	matr[1][2] = -cos(pitch)*sin(roll);
 
-	matr[0][0] = -cos(pitch)*sin(yaw);
-	matr[0][1] = sin(pitch)*sin(yaw)*cos(roll)+cos(yaw)*sin(roll);
-	matr[0][2] = -sin(pitch)*sin(yaw)*sin(roll) + cos(yaw)*cos(roll);
+	matr[2][0] = -cos(pitch)*sin(yaw);
+	matr[2][1] = sin(pitch)*sin(yaw)*cos(roll)+cos(yaw)*sin(roll);
+	matr[2][2] = -sin(pitch)*sin(yaw)*sin(roll) + cos(yaw)*cos(roll);
+}
+
+void matrix::fillMatrix(double pitch, double yaw, double roll)
+{
+	matr[0][0] = cos(pitch)*cos(yaw);
+	matr[1][0] = -sin(pitch)*cos(yaw)*cos(roll) + sin(yaw)*sin(roll);
+	matr[2][0] = sin(pitch)*cos(yaw)*sin(roll) + sin(yaw)*cos(roll);
+
+	matr[0][1] = sin(pitch);
+	matr[1][1] = cos(pitch)*cos(roll);
+	matr[2][1] = -cos(pitch)*sin(roll);
+
+	matr[0][2] = -cos(pitch)*sin(yaw);
+	matr[1][2] = sin(pitch)*sin(yaw)*cos(roll) + cos(yaw)*sin(roll);
+	matr[2][2] = -sin(pitch)*sin(yaw)*sin(roll) + cos(yaw)*cos(roll);
 }
 
 
